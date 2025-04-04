@@ -1,0 +1,55 @@
+{% extends 'core.html' %}
+{% load i18n %}
+{% block title %}{% trans "Legal Disclaimer" %} &mdash; Ahmia{% endblock %}
+{% block body %}
+  <div id="ahmiaDisclaimer">
+    <p>
+      <strong>{% trans "Ahmia content warning" %}:</strong>
+      {% blocktrans %}
+        The indexed sites are running inside the Tor network and Ahmia.fi is not responsible for them.
+        The administrator of this site (Ahmia.fi) cannot be held responsible for any actions of its users.
+      {% endblocktrans %}
+    </p>
+
+    <h3>{% trans "Beware when accessing Tor content" %}</h3>
+    <p class="end">
+      {% blocktrans %}
+        We cannot guarantee the validity of the information found here.
+        We do not have anything to do with the actual Tor onion services.
+      {% endblocktrans %}
+    </p>
+
+    <h3>{% trans "Contact and reporting child abuse" %}</h3>
+    <p class="end">
+      {% blocktrans %}
+        This site is fully compliant with the Law of Finland. The administrator is removing any links to child abuse content.
+
+        Please 1. email us the exact URL of the content you suspect to be child abuse,
+        and 2. <a href="https://report.iwf.org.uk/en/report">report anonymously to the Internet Watch Foundation.</a>.
+      {% endblocktrans %}
+    </p>
+    <p class="end">
+      <strong>
+        Updated policy in October 2023:
+        There is now a filtering of all sexually related searchers due to the unfortunate massive distribution and search of child sexual abuse on Tor.
+      </strong>
+
+      If the search contains these terms, then Ahmia.fi refuses to show the results.
+      Instead, the search offers a link to a self-help programme.
+
+      The self-help programme is primarily intended for people who are worried about their interests, thoughts, feelings, or actions concerning children.
+
+      For example, &bdquo;jailbait&ldquo; is one of these filtered terms. As a result, Ahmia.fi is offering a link to a self-help programme:
+      <a href="https://ahmia.fi/search/?q=jailbait">https://ahmia.fi/search/?q=jailbait</a>
+
+      In addition, Ahmia applies an automated text mining algorithm to remove possible links to child abuse from the search results.
+    </p>
+    <p>
+      {% blocktrans %}
+        Please contact Juha Nurmi, Ahmia Project Leader,
+        at <a href="mailto:juha.nurmi@ahmia.fi">juha.nurmi@ahmia.fi</a>.
+      {% endblocktrans %}
+    </p>
+  </div>
+
+{% endblock %}

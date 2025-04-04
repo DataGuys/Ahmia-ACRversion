@@ -1,0 +1,77 @@
+{% extends 'core.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "About Us" %} &mdash; Ahmia{% endblock %}
+{% block body %}
+  <div id="ahmiaAboutPage">
+      <div class="aboutAhmia">
+        <h2 class="sr">{% trans "About Ahmia" %}</h2>
+        <p>
+          {% blocktrans %} Ahmia's mission is to create the premier search engine for services
+              residing on the Tor anonymity network. In doing so, we hope to share meaningful
+              statistics, insights, and news about the Tor network and the Tor project.
+          {% endblocktrans %}
+        </p>
+        <p>
+          {% blocktrans %} Contributors to Ahmia believe that the Tor network is an important
+              and resilient distributed platform for anonymity and privacy worldwide. By
+              providing a search engine for what many call the "deep web" or "dark net", Ahmia
+              makes onion services accessible to a wide range of people, not just Tor network early
+              adopters.
+          {% endblocktrans %}
+        </p>
+        <p>
+
+        </p>
+      </div>
+      <div class="aboutTeam">
+        <h3>{% trans "Juha Nurmi, Ahmia Project Leader" %}</h3>
+        <img src="/static/images/juha_nurmi.png" alt="{% trans " Juha Nurmi " %}" class="teamPhoto">
+        <p>
+          {% trans "Juha Nurmi" as juha_nurmi %}
+          {% blocktrans %}
+              <strong>{{ juha_nurmi }}</strong> (
+              <a href="mailto:juha.nurmi@ahmia.fi">juha.nurmi@ahmia.fi</a>) is the founder and
+              project leader of the Ahmia search engine project. He is a security researcher,
+              and has been involved in numerous projects funded by both the commercial and
+              government spheres. Juha is also a noted lecturer and public speaker.
+          {% endblocktrans %}
+        </p>
+      </div>
+      <div class="moreOnAhmia">
+        <h3>{% trans "More on Ahmia" %}</h3>
+        <p>
+          {% blocktrans %} Ahmia is an active area of research, and is in development on
+              GitHub<a href="//github.com/ahmia">
+              <img src="/static/images/logos/github.png" alt="Github link" class="github"></a>
+              as a free and open source project. If you would like to learn more about Ahmia,
+              download our documentation or presentations on the search
+              engine:
+          {% endblocktrans %}
+        </p>
+        <ul>
+          <li><a href="{% url 'doc' %}">{% trans "Documentation" %}</a></li>
+          <li>
+              <a href="https://blog.torproject.org/blog/tor-heart-ahmia-project">
+                {% trans "Ahmia and the Tor Ecosystem" %}
+              </a>
+          </li>
+        </ul>
+      </div>
+      <div class="credits">
+        <ul>
+          <li><img src="/static/images/logos/globaleaks.png"
+                   alt="{% trans " Globaleaks Platform " %}"></li>
+          <li><img src="/static/images/logos/tor2web.png"
+                   alt="{% trans " Tor2Web Platform " %}"></li>
+          <li><img src="/static/images/logos/hermes.png"
+                   alt="{% trans " HERMES Center for Transparency and Digital Rights " %}">
+          </li>
+          <li><img src="/static/images/logos/torproject.png"
+                   alt="{% trans " Tor Project " %}"></li>
+        </ul>
+      </div>
+  </div>
+
+
+{% endblock %}

@@ -1,0 +1,24 @@
+# Systemd file if you dont want to use /bin/run-ahmia.sh
+
+[Unit]
+Description=Gunicorn instance to serve Ahmia.fi site
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/usr/local/lib/ahmia-site/
+Environment="DJANGO_SETTINGS_MODULE=ahmia.settings" "LANG=en_US.UTF-8" "PYTHONPATH=/usr/local/lib/ahmia-site/"
+ExecStart=/usr/local/lib/ahmia-site/venv/bin/gunicorn ahmia.wsgi:application \
+          --bind unix:/tmp/ahmia.sock \
+          --workers 4 \
+          --max-requests 5000 \
+          --log-level=info \
+          --log-file=/usr/local/lib/ahmia-site/gunicorn.log \
+          --pid=/tmp/project-master.pid
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
