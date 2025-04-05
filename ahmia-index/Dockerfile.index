@@ -1,0 +1,36 @@
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    bash \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements file
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY . .
+
+# Create directory for certificates
+RUN mkdir -p /usr/local/share/ca-certificates/
+
+# Make scripts executable
+RUN chmod +x setup_index.sh
+RUN chmod +x call_filtering.sh
+RUN chmod +x wrap_filtering.sh
+
+# Set environment variables
+ENV ES_URL=https://elasticsearch:9200/
+ENV ES_CA_CERTS=/usr/local/share/ca-certificates/http_ca.crt
+ENV ES_USERNAME=elastic
+ENV ES_PASSWORD=password12345
+ENV ES_TOR_INDEX=latest-tor
+
+# The container will run commands passed via docker-compose
+CMD ["bash"]
