@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.1
+    container_name: ahmia-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=password12345
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    networks:
+      - ahmia-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  ahmia-index:
+    build:
+      context: ./ahmia-index
+      dockerfile: Dockerfile.index
+    container_name: ahmia-index
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      - ES_URL=https://elasticsearch:9200/
+      - ES_USERNAME=elastic
+      - ES_PASSWORD=password12345
+      - ES_CA_CERTS=/usr/local/share/ca-certificates/http_ca.crt
+    volumes:
+      - certs:/usr/local/share/ca-certificates
+    networks:
+      - ahmia-network
+    command: >
+      bash -c "
+        while ! curl -s --cacert \$ES_CA_CERTS -u \$ES_USERNAME:\$ES_PASSWORD \$ES_URL; do
+          echo 'Waiting for Elasticsearch...'
+          sleep 5
+        done
+        bash setup_index.sh
+        python point_to_indexes.py --add
+        echo 'Ahmia index setup complete'
+        tail -f /dev/null
+      "
+
+  tor-proxy:
+    image: dperson/torproxy
+    container_name: tor-proxy
+    restart: unless-stopped
+    networks:
+      - ahmia-network
+    ports:
+      - "9050:9050"  # Tor proxy port
+
+  ahmia-crawler:
+    build:
+      context: ./ahmia-crawler
+      dockerfile: Dockerfile.crawler
+    container_name: ahmia-crawler
+    depends_on:
+      - ahmia-index
+      - tor-proxy
+    environment:
+      - ES_URL=https://elasticsearch:9200/
+      - ES_USERNAME=elastic
+      - ES_PASSWORD=password12345
+      - ES_CA_CERTS=/usr/local/share/ca-certificates/http_ca.crt
+    volumes:
+      - certs:/usr/local/share/ca-certificates
+    networks:
+      - ahmia-network
+    command: >
+      bash -c "
+        while ! curl -s --cacert \$ES_CA_CERTS -u \$ES_USERNAME:\$ES_PASSWORD \$ES_URL; do
+          echo 'Waiting for Elasticsearch...'
+          sleep 5
+        done
+        cd ahmia
+        python -m scrapy crawl ahmia-tor -s DEPTH_LIMIT=3
+      "
+
+  ahmia-site:
+    build:
+      context: ./ahmia-site
+      dockerfile: Dockerfile.site
+    container_name: ahmia-site
+    depends_on:
+      - ahmia-index
+    environment:
+      - ES_URL=https://elasticsearch:9200/
+      - ES_USERNAME=elastic
+      - ES_PASSWORD=password12345
+      - ES_CA_CERTS=/usr/local/share/ca-certificates/http_ca.crt
+      - ELASTICSEARCH_TIMEOUT=60
+    volumes:
+      - certs:/usr/local/share/ca-certificates
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - ahmia-network
+
+networks:
+  ahmia-network:
+    driver: bridge
+
+volumes:
+  es_data:
+    driver: local
+  certs:
+    driver: local
