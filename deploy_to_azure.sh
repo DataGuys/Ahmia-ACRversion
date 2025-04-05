@@ -1,26 +1,17 @@
 #!/bin/bash
-# Fixed deployment script for Azure Cloud Shell compatibility
+# Simplified deployment script that accepts parameters from the one-liner
 
 set -e
 
-# ------------------------------------------------------------------------------
-# DEPLOY_TO_AZURE.SH
-# ------------------------------------------------------------------------------
-# Purpose:
-#   - Deploy the Ahmia multi-container solution to Azure
-#   - Uses Azure Container Registry for Docker images
-#
-# Usage:
-#   ./deploy_to_azure.sh
-# ------------------------------------------------------------------------------
+# Accept subscription ID and resource group as parameters
+SUBSCRIPTION="$1"
+RG="$2"
 
-# 1) List subscriptions and let user choose one
-echo "Available Azure Subscriptions:"
-az account list --query "[].{Name:name, ID:id}" -o table
-
-echo ""
-echo "Please enter the Subscription ID you want to use:"
-read SUBSCRIPTION
+# Show usage if parameters are missing
+if [ -z "$SUBSCRIPTION" ] || [ -z "$RG" ]; then
+    echo "Usage: $0 <subscription-id> <resource-group-name>"
+    exit 1
+fi
 
 # Validate subscription ID
 if ! az account show --subscription "$SUBSCRIPTION" &>/dev/null; then
@@ -31,14 +22,12 @@ fi
 echo "Setting subscription to: $SUBSCRIPTION"
 az account set --subscription "$SUBSCRIPTION"
 
-# 2) Prompt for Resource Group name
-read -p "Enter Resource Group name (e.g. 'AhmiaRG'): " RG
 LOCATION="eastus"
 
 echo "Creating/using resource group: $RG in $LOCATION"
 az group create --name "$RG" --location "$LOCATION" --output none
 
-# 3) Generate random suffix to keep resource names unique
+# Generate random suffix to keep resource names unique
 RANDOM_SUFFIX=$(date +%s)
 ACR="ahmiareg${RANDOM_SUFFIX}"
 ACI="ahmiaContainer"
@@ -54,7 +43,7 @@ echo "DNS Label:         $DNS_LABEL"
 echo "------------------------------------------------------------"
 echo ""
 
-# 4) Create or reuse ACR
+# Create or reuse ACR
 echo "Creating ACR: $ACR (SKU: Basic)"
 az acr create \
   --resource-group "$RG" \
@@ -65,7 +54,7 @@ az acr create \
 
 echo "ACR created (or already exists)."
 
-# 5) Build & push Docker image to ACR
+# Build & push Docker image to ACR
 echo "Building Docker image from GitHub repo..."
 az acr build \
   --registry "$ACR" \
@@ -73,7 +62,7 @@ az acr build \
   --file Dockerfile \
   "https://github.com/DataGuys/Ahmia-ACRversion.git"
 
-# 6) Deploy to Azure Container Instances
+# Deploy to Azure Container Instances
 echo "Deploying container to ACI: $ACI"
 ACR_USERNAME=$(az acr credential show -n "$ACR" --query "username" -o tsv)
 ACR_PASSWORD=$(az acr credential show -n "$ACR" --query "passwords[0].value" -o tsv)
