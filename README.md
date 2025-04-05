@@ -1,11 +1,6 @@
 # Complete build of Ahmia on Azure ACR all modules.
 
 ```bash
-## Quick Deployment
-
-Deploy Ahmia to Azure with a single command (you'll be prompted for subscription ID and resource group):
-
-```bash
 echo "Available Azure Subscriptions:" && \
 az account list --query "[].{Name:name, ID:id}" -o table && \
 read -p "Enter your Subscription ID: " SUBSCRIPTION_ID && \
